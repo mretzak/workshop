@@ -1,0 +1,52 @@
+# Ignore bundler config.
+/.bundle
+
+# Ignore all logfiles and tempfiles.
+/log/*
+!/log/.keep
+/tmp
+
+# Ignore database configuration and sensitive files.
+/config/database.yml
+/config/master.key
+/config/credentials.yml.enc
+
+# Ignore uploaded files in development.
+/storage/*
+!/storage/.keep
+
+# Ignore Mac DS_Store files.
+.DS_Store
+
+# Ignore build artifacts and node modules.
+/node_modules
+/yarn-error.log
+/public/assets
+/public/packs
+/public/packs-test
+/public/vite
+/public/vite-test
+.yarn-integrity
+
+# Ignore Byebug history.
+.byebug_history
+
+# Ignore Vim swap files and backup files
+*.swp
+*~
+*.swo
+
+# Ignore VS Code settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Ignore SQLite database files
+*.sqlite3
+*.sqlite3-journal
+
+# Ignore .env file
+.env*

@@ -1,0 +1,81 @@
+#!/bin/bash -e
+
+# Workshop-specific database setup with automatic migration and seeding
+if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+  echo "🚀 Starting N+1 Workshop application..."
+  echo "📊 Setting up database (Host: ${DATABASE_HOST:-localhost}, User: ${DATABASE_USERNAME:-workshop}, DB: workshop_development)..."
+
+  echo "⏳ Waiting for Rails to connect to database..."
+  retry_count=0
+  max_retries=30 # Wait for up to 60 seconds (30 * 2s)
+  until ./bin/rails runner "ActiveRecord::Base.connection.execute('SELECT 1')" > /dev/null 2>&1; do
+    retry_count=$((retry_count + 1))
+    if [ "$retry_count" -gt "$max_retries" ]; then
+      echo "❌ Failed to connect to database via Rails after $max_retries attempts. Dumping last connection attempt error:"
+      # Attempt one last time, showing errors to stdout/stderr
+      ./bin/rails runner "begin; ActiveRecord::Base.connection.execute('SELECT 1'); rescue => e; STDERR.puts \"Connection error: #{e.class} - #{e.message}\"; exit 1; end"
+      exit 1 # Exit if the verbose attempt also fails or if it succeeds (shouldn't happen here)
+    fi
+    echo "Database not ready for Rails (attempt $retry_count/$max_retries), waiting 2s..."
+    sleep 2
+  done
+  echo "✅ Rails connected to database!"
+
+  echo "🔎 Checking if database schema (tables) exists..."
+  # Capture the output from the Rails runner script
+  # This script will print specific strings based on the state
+  setup_needed_output=$(RAILS_ENV=development ./bin/rails runner "
+    begin
+      User.count # Attempt to count users
+      puts 'SETUP_NOT_NEEDED'
+    rescue ActiveRecord::StatementInvalid, PG::UndefinedTable # Common errors if tables don't exist
+      puts 'NEEDS_SETUP_TABLES_MISSING'
+    rescue PG::ConnectionBad => e # Specific connection errors
+      puts \"NEEDS_SETUP_CONNECTION_BAD: #{e.message.split('\\n').first}\"
+    rescue => e # Other errors
+      puts \"NEEDS_SETUP_OTHER_ERROR: #{e.class} - #{e.message.split('\\n').first}\"
+    end
+  ")
+
+  echo "🔬 DB Check Output: ${setup_needed_output}"
+
+  if [[ "${setup_needed_output}" == "SETUP_NOT_NEEDED" ]]; then
+    echo "📋 Database schema already exists. Checking for pending migrations..."
+    RAILS_ENV=development ./bin/rails db:migrate
+    if [ $? -ne 0 ]; then
+      echo "❌ Database migration failed during routine check!"
+      exit 1
+    fi
+    echo "✅ Database migrations checked. Ready for workshop!"
+  elif [[ "${setup_needed_output}" == NEEDS_SETUP* ]]; then # Catches all NEEDS_SETUP variants
+    echo "🔧 Database needs setup. Reason: ${setup_needed_output}"
+
+    echo "⚙️ Running database migrations..."
+    RAILS_ENV=development ./bin/rails db:migrate
+    if [ $? -ne 0 ]; then
+      echo "❌ Database migration failed!"
+      exit 1
+    fi
+
+    echo "🌱 Seeding workshop data..."
+    RAILS_ENV=development ./bin/rails db:seed
+    if [ $? -ne 0 ]; then
+      echo "❌ Database seeding failed!"
+      exit 1
+    fi
+    echo "✨ Workshop database setup complete!"
+  else
+    echo "🤷 Unknown database state from check: '${setup_needed_output}'. Exiting."
+    exit 1
+  fi
+
+  echo ""
+  echo "🎯 Workshop endpoints ready:"
+  echo "   📝 Rails API (N+1 example): http://localhost:3000/posts/n_plus_one"
+  echo "   🚀 Rails API (Optimized):   http://localhost:3000/posts/optimized"
+  echo "   🔍 GraphQL Endpoint:        http://localhost:3000/graphql"
+  echo "   🎨 GraphiQL UI:             http://localhost:3000/graphiql"
+  echo ""
+fi
+
+exec "${@}"
