@@ -5,7 +5,7 @@
 1. **Start the application:**
 
    ```bash
-   docker-compose up --build
+   docker compose up --build
    # OR
    rails server
    ```
@@ -165,8 +165,8 @@ Show the complete implementation and how to use it in resolvers.
 **Database connection errors:**
 
 ```bash
-docker-compose down
-docker-compose up --build
+docker compose down
+docker compose up --build
 ```
 
 **No sample data:**

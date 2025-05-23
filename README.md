@@ -42,7 +42,7 @@ The application will be available at `http://localhost:3000`
 
 ```bash
 # Manual Docker approach
-docker-compose up --build
+docker compose up --build
 # Database setup is automatic on first run!
 ```
 
@@ -255,7 +255,7 @@ Watch your Rails logs while making requests to see:
 
 ```bash
 # Reset database
-docker-compose exec web rails db:drop db:create db:migrate db:seed
+docker compose exec web rails db:drop db:create db:migrate db:seed
 
 # Or without Docker
 rails db:reset
@@ -265,8 +265,8 @@ rails db:reset
 
 ```bash
 # Rebuild containers
-docker-compose down
-docker-compose up --build
+docker compose down
+docker compose up --build
 ```
 
 ## 📝 License

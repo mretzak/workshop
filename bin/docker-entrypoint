@@ -5,18 +5,21 @@ if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   echo "🚀 Starting N+1 Workshop application..."
   echo "📊 Setting up database (Host: ${DATABASE_HOST:-localhost}, User: ${DATABASE_USERNAME:-workshop}, DB: workshop_development)..."
 
+  echo "DEBUG: DATABASE_HOST environment variable is: [${DATABASE_HOST}]" # Added for debugging
+
   echo "⏳ Waiting for Rails to connect to database..."
   retry_count=0
   max_retries=30 # Wait for up to 60 seconds (30 * 2s)
-  until ./bin/rails runner "ActiveRecord::Base.connection.execute('SELECT 1')" > /dev/null 2>&1; do
+  # Removed > /dev/null 2>&1 from the next line to see errors on each attempt
+  until RAILS_ENV=development ./bin/rails runner "ActiveRecord::Base.connection.execute('SELECT 1')"; do
     retry_count=$((retry_count + 1))
     if [ "$retry_count" -gt "$max_retries" ]; then
-      echo "❌ Failed to connect to database via Rails after $max_retries attempts. Dumping last connection attempt error:"
-      # Attempt one last time, showing errors to stdout/stderr
-      ./bin/rails runner "begin; ActiveRecord::Base.connection.execute('SELECT 1'); rescue => e; STDERR.puts \"Connection error: #{e.class} - #{e.message}\"; exit 1; end"
-      exit 1 # Exit if the verbose attempt also fails or if it succeeds (shouldn't happen here)
+      echo "❌ Failed to connect to database via Rails after $max_retries attempts. See error from last attempt above."
+      # The script will likely exit here due to set -e and the failing command in the until condition
+      exit 1
     fi
-    echo "Database not ready for Rails (attempt $retry_count/$max_retries), waiting 2s..."
+    # Updated message to guide where to look for the error
+    echo "Database not ready for Rails (attempt $retry_count/$max_retries), waiting 2s... Error from rails runner should be visible above this line."
     sleep 2
   done
   echo "✅ Rails connected to database!"

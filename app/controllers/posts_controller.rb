@@ -34,11 +34,14 @@ class PostsController < ApplicationController
 
   def posts_json(posts)
     posts.map do |post|
+      # Ensure comments are loaded before calling size,
+      # though `includes` should handle this.
+      loaded_comments = post.comments.to_a
       {
         id: post.id,
         title: post.title,
         user_name: post.user.name, # This line causes N+1 without eager loading
-        comments_count: post.comments.size, # This line causes N+1 without eager loading
+        comments_count: loaded_comments.size, # This line causes N+1 without eager loading
         tag_names: post.tags.map(&:name) # This line causes N+1 without eager loading
       }
     end

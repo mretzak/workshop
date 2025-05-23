@@ -29,7 +29,7 @@ echo ""
 # Function to check if the app is ready
 check_app_ready() {
     # Check for a specific log message from docker-entrypoint that indicates readiness
-    docker-compose logs web | grep -q "🎯 Workshop endpoints ready:"
+    docker compose logs web | grep -q "🎯 Workshop endpoints ready:"
 }
 
 # Wait for the app to be ready
