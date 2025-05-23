@@ -1,0 +1,351 @@
+<!-- app/views/challenges/index.html.erb -->
+<div class="container mx-auto px-4 py-8">
+  <h1>N+1 Workshop Challenges</h1>
+
+  <label for="challenge-select">Select a Challenge:</label>
+  <select id="challenge-select">
+    <option value="challenge1">Challenge 1: Rails ActiveRecord N+1 Problem</option>
+    <option value="challenge2">Challenge 2: GraphQL N+1 Problem</option>
+    <option value="bonus">Bonus Challenge: Mixed Approach</option>
+  </select>
+
+  <hr>
+
+  <div id="challenge-content">
+    <div id="challenge1-content" class="challenge-section">
+      <h2>Challenge 1: Rails ActiveRecord N+1 Problem</h2>
+
+      <h3>The Problem</h3>
+      <p>Look at this controller action that's causing N+1 queries:</p>
+      <pre><code class="language-ruby">
+class PostsController &lt; ApplicationController
+  def index
+    @posts = Post.all
+
+    # This view will cause N+1 queries
+    render json: @posts.map do |post|
+      {
+        title: post.title,
+        author: post.user.name,
+        comments_count: post.comments.size,
+        tags: post.tags.map(&amp;:name)
+      }
+    end
+  end
+end
+      </code></pre>
+
+      <h3>Your Task</h3>
+      <ol>
+        <li><strong>Identify the N+1</strong>: What line(s) cause N+1 queries?</li>
+        <li><strong>Fix it</strong>: Rewrite the controller to eliminate N+1 using Rails eager loading</li>
+        <li><strong>Choose the right method</strong>: Decide between <code>includes</code>, <code>preload</code>, or <code>eager_load</code></li>
+      </ol>
+
+      <h3>Hints</h3>
+      <ul>
+        <li><code>includes</code>: Let Rails decide (separate queries or JOIN)</li>
+        <li><code>preload</code>: Force separate queries</li>
+        <li><code>eager_load</code>: Force LEFT OUTER JOIN</li>
+      </ul>
+
+      <h3>Test Your Solution</h3>
+      <p>
+        Run the problematic version:
+        <br>
+        <code>curl http://localhost:3000/posts/n_plus_one</code>
+        <br>
+        <a href="/posts/n_plus_one" target="_blank">Open problematic version in browser</a>
+      </p>
+      <p>
+        Run your optimized version:
+        <br>
+        <code>curl http://localhost:3000/posts/optimized</code>
+        <br>
+        <a href="/posts/optimized" target="_blank">Open optimized version in browser</a>
+      </p>
+      <p>Check the Rails logs to see the difference in SQL queries!</p>
+    </div>
+
+    <div id="challenge2-content" class="challenge-section" style="display: none;">
+      <h2>Challenge 2: GraphQL N+1 Problem</h2>
+
+      <h3>The Problem</h3>
+      <p>This GraphQL query causes N+1:</p>
+      <pre><code class="language-graphql">
+query {
+  posts {
+    title
+    user {
+      name
+    }
+    comments {
+      content
+    }
+    tags {
+      name
+    }
+  }
+}
+      </code></pre>
+
+      <h3>Your Task</h3>
+      <ol>
+        <li><strong>Create a DataLoader</strong>: Write a batch loading function for post authors</li>
+        <li><strong>Update the resolver</strong>: Modify the PostType to use your DataLoader</li>
+        <li><strong>Test it</strong>: Compare before/after SQL query counts</li>
+      </ol>
+
+      <h3>DataLoader Template</h3>
+      <pre><code class="language-ruby">
+class Loaders::AuthorLoader &lt; GraphQL::Batch::Loader
+  def perform(user_ids)
+    # Your batch loading logic here
+    # Hint: Load all users at once, then fulfill each ID
+  end
+end
+      </code></pre>
+
+      <h3>Test Your Solution</h3>
+      <p>
+        <a href="/graphiql" target="_blank">Open GraphiQL to test your queries</a>
+      </p>
+      <pre><code class="language-graphql">
+# Try both queries and watch the logs:
+
+# Original (N+1):
+query {
+  posts {
+    title
+    user {
+      name
+    }
+  }
+}
+
+# Optimized:
+query {
+  optimizedPosts {
+    title
+    user {
+      name
+    }
+  }
+}
+      </code></pre>
+    </div>
+
+    <div id="bonus-content" class="challenge-section" style="display: none;">
+      <h2>Bonus Challenge: Mixed Approach</h2>
+
+      <h3>The Scenario</h3>
+      <p>Imagine a GraphQL query for posts where you <em>always</em> want to show the author's name and the post's tags because they are fundamental to the display. However, comments for a post might only be shown if the user clicks a "View Comments" button, or perhaps they are paginated and loaded on demand. In such cases, eager-loading everything might be inefficient if some data isn't always needed.</p>
+
+      <h3>Your Task</h3>
+      <ol>
+        <li><strong>Identify Eager Load Candidates</strong>: For a GraphQL query that fetches posts, their authors, tags, and comments, decide which associations are suitable for Rails eager loading (always needed) and which are better handled by DataLoaders (conditionally or less frequently needed).</li>
+        <li><strong>Implement Mixed Loading</strong>:
+          <ul>
+            <li>Modify an existing GraphQL query (e.g., <code>optimizedPosts</code> or create a new one like <code>mixedLoadedPosts</code>) to use Rails <code>includes</code> (or <code>preload</code>/<code>eager_load</code>) for the <code>user</code> and <code>tags</code> associations directly within the primary resolver that fetches the posts.</li>
+            <li>Ensure that the <code>comments</code> association (or another association of your choice if comments are also eager-loaded) continues to be loaded via its DataLoader.</li>
+          </ul>
+        </li>
+        <li><strong>Verify Efficiency</strong>: Compare the SQL logs before and after your changes. You should see that the queries for users and tags are part of the initial post loading (or batched efficiently by Rails), while comments are still loaded in batches by their DataLoader when requested.</li>
+      </ol>
+
+      <h3>Hints</h3>
+      <ul>
+        <li>In your GraphQL resolver for posts (e.g., in <code>app/graphql/types/query_type.rb</code>), when fetching <code>Post.all</code>, you can chain <code>.includes(:user, :tags)</code>.</li>
+        <li>Ensure your <code>PostType</code> still defines fields for <code>user</code>, <code>tags</code>, and <code>comments</code>, and that the resolvers for these fields (especially <code>comments</code>) correctly use DataLoaders if they are not part of the initial eager load.</li>
+        <li>Think about the data access patterns: what's displayed immediately vs. what's loaded on interaction?</li>
+      </ul>
+
+      <h3>Test Your Solution</h3>
+      <ol>
+        <li>Construct a GraphQL query that requests posts along with their user (name), tags (name), and comments (content).</li>
+        <li>Run this query against your new/modified GraphQL field.</li>
+        <li>Examine the Rails console logs:
+          <ul>
+            <li>You should see fewer individual N+1 queries for <code>users</code> and <code>tags</code> associated with each post. Ideally, they are fetched in one or two additional queries by Rails' eager loading mechanism when the posts themselves are loaded.</li>
+            <li>You should still see the <code>CommentsByPostLoader</code> (or similar) being invoked and batching queries if you request comments.</li>
+          </ul>
+        </li>
+        <li>Compare this to a version of the query that relies purely on DataLoaders for all associations, or one that has no N+1 protection, to see the difference in query patterns.</li>
+      </ol>
+      <p>
+        <a href="/graphiql" target="_blank">Open GraphiQL to test your queries</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Prism.js CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const selectElement = document.getElementById('challenge-select');
+    const challengeSections = document.querySelectorAll('.challenge-section');
+
+    function displayChallenge(selectedValue, updateHash = true) {
+      challengeSections.forEach(section => {
+        section.style.display = 'none';
+      });
+
+      const selectedSection = document.getElementById(selectedValue + '-content');
+      if (selectedSection) {
+        selectedSection.style.display = 'block';
+      }
+
+      if (updateHash) {
+        window.location.hash = selectedValue;
+      }
+      // Ensure Prism highlights new content if it was previously hidden
+      setTimeout(() => Prism.highlightAll(), 0);
+    }
+
+    // Check for hash on page load
+    if (window.location.hash) {
+      const hashValue = window.location.hash.substring(1); // Remove #
+      if (selectElement && Array.from(selectElement.options).some(opt => opt.value === hashValue)) {
+        selectElement.value = hashValue;
+        displayChallenge(hashValue, false); // Don't update hash again
+      } else if (selectElement) {
+        // Fallback to first option if hash is invalid
+        displayChallenge(selectElement.value);
+      }
+    } else if (selectElement) {
+      // Display initial challenge based on select (usually the first one)
+      displayChallenge(selectElement.value);
+    }
+
+    // Add event listener for changes
+    if (selectElement) {
+      selectElement.addEventListener('change', function() {
+        displayChallenge(this.value);
+      });
+    }
+  });
+</script>
+
+<!-- Prism.js JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  // Ensure Prism runs after content is displayed by the dropdown logic
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initial highlight is now handled by displayChallenge function after content is visible
+    // Prism.highlightAll(); // Can be removed if displayChallenge handles it
+
+    // Re-highlight when challenge changes is also handled by displayChallenge
+    // const selectElement = document.getElementById('challenge-select');
+    // if (selectElement) {
+    //     selectElement.addEventListener('change', function() {
+    //         setTimeout(function() {
+    //             Prism.highlightAll();
+    //         }, 0);
+    //     });
+    // }
+  });
+</script>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    margin: 0;
+    /* padding: 20px; Removed to let container handle padding */
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 960px; /* Added max-width */
+    margin: 0 auto;   /* Added centering */
+    padding: 20px; /* Added padding to container */
+  }
+
+  h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #34495e;
+  }
+
+  select#challenge-select {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #bdc3c7;
+    background-color: white;
+    font-size: 1em;
+    margin-bottom: 20px;
+    min-width: 300px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  hr {
+    border: 0;
+    height: 1px;
+    background: #e0e0e0;
+    margin-bottom: 30px;
+  }
+
+  #challenge-content {
+    margin-top: 20px;
+    padding: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  }
+
+  .challenge-section h2 {
+    margin-top: 0;
+    color: #2980b9;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .challenge-section h3 {
+    color: #34495e;
+    margin-top: 25px;
+    margin-bottom: 10px;
+  }
+
+  pre[class*="language-"] {
+    background-color: #2d2d2d; /* Ensure this matches your desired dark theme if not using okaidia directly */
+    border-radius: 6px;
+    padding: 15px;
+    border: 1px solid #444;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 0.95em;
+  }
+
+  /* Styling for lists */
+  ul, ol {
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 8px;
+  }
+
+  strong {
+    color: #c0392b; /* Emphasize strong text */
+  }
+
+  p {
+    margin-bottom: 15px;
+  }
+
+</style>

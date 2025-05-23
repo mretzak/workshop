@@ -32,6 +32,9 @@ Rails.application.routes.draw do
   get 'users/n_plus_one', to: 'users#index_with_n_plus_one'
   get 'users/optimized', to: 'users#index_optimized'
 
+  # Route for workshop challenges page
+  get 'challenges', to: 'challenges#index', as: :workshop_challenges
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
