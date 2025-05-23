@@ -1,5 +1,11 @@
 #!/bin/bash -e
 
+# Remove a potentially stale server PID file
+if [ -f /rails/tmp/pids/server.pid ]; then
+  echo "Removing stale server.pid"
+  rm /rails/tmp/pids/server.pid
+fi
+
 # Workshop-specific database setup with automatic migration and seeding
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   echo "🚀 Starting N+1 Workshop application..."
