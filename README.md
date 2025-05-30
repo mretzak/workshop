@@ -21,7 +21,7 @@ Learn to identify, understand, and solve N+1 query problems using:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone git@github.com:mretzak/workshop.git
 cd workshop
 
 # Start everything with one command
