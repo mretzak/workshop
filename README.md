@@ -136,7 +136,7 @@ curl http://localhost:3000/posts/optimized   # Optimized version
 
 ### GraphQL N+1 Examples
 
-Access GraphQL playground at `http://localhost:3000/graphql`
+Access GraphQL playground at [http://localhost:3000/graphiql](http://localhost:3000/graphiql)
 
 #### The Problem Query
 
@@ -174,15 +174,17 @@ query {
 
 ## 🛠️ Workshop Challenges
 
-See [WORKSHOP_CHALLENGES.md](WORKSHOP_CHALLENGES.md) for hands-on exercises.
-
 ### Challenge 1: Fix Rails N+1
 
 Identify and fix N+1 queries in a Rails controller using appropriate eager loading.
 
+[Instructions for participants](http://localhost:3000/challenges#challenge1)
+
 ### Challenge 2: Implement GraphQL Batch Loader
 
 Create a Batch Loader to batch-load user data in GraphQL resolvers.
+
+[Instructions for participants](http://localhost:3000/challenges#challenge2)
 
 ## 📁 Project Structure
 
