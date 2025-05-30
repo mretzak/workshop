@@ -26,7 +26,7 @@ module Types
     field :comments, [Types::CommentType], null: false, description: "All comments (will cause N+1)"
     field :published_posts, [Types::PostType], null: false, description: "Published posts only"
 
-    # Optimized queries using DataLoaders and eager loading
+    # Optimized queries using Batch Loaders and eager loading
     field :optimized_users, [Types::OptimizedUserType], null: false, description: "Users with optimized loading"
     field :optimized_posts, [Types::OptimizedPostType], null: false, description: "Posts with optimized loading"
     field :optimized_published_posts, [Types::OptimizedPostType], null: false, description: "Published posts with optimized loading"

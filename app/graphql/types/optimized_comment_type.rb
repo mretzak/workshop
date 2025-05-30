@@ -7,7 +7,7 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    # Using DataLoaders to prevent N+1 queries
+    # Using Batch Loaders to prevent N+1 queries
     def post
       Loaders::PostLoader.load(object.post_id)
     end

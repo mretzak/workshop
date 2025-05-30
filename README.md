@@ -7,7 +7,7 @@ A hands-on Rails application for learning about N+1 query problems and their sol
 Learn to identify, understand, and solve N+1 query problems using:
 
 - **Rails ActiveRecord**: `includes`, `preload`, `eager_load`
-- **GraphQL**: DataLoader pattern with `graphql-batch`
+- **GraphQL**: Batch Loader pattern with `graphql-batch`
 - **Detection Tools**: Bullet gem for automatic N+1 detection
 
 ## 🚀 Zero-Setup Start
@@ -180,9 +180,9 @@ See [WORKSHOP_CHALLENGES.md](WORKSHOP_CHALLENGES.md) for hands-on exercises.
 
 Identify and fix N+1 queries in a Rails controller using appropriate eager loading.
 
-### Challenge 2: Implement GraphQL DataLoader
+### Challenge 2: Implement GraphQL Batch Loader
 
-Create a DataLoader to batch-load user data in GraphQL resolvers.
+Create a Batch Loader to batch-load user data in GraphQL resolvers.
 
 ## 📁 Project Structure
 
@@ -192,7 +192,7 @@ app/
 │   ├── posts_controller.rb      # N+1 examples & solutions
 │   └── users_controller.rb      # More N+1 examples
 ├── graphql/
-│   ├── loaders/                 # DataLoader implementations
+│   ├── loaders/                 # Batch Loader implementations
 │   └── types/                   # GraphQL types (problem & optimized)
 └── models/                      # User, Post, Comment, Tag models
 
@@ -206,7 +206,7 @@ config/
 - **Rails 7.1** - Web framework
 - **PostgreSQL** - Database
 - **GraphQL-Ruby** - GraphQL implementation
-- **GraphQL-Batch** - DataLoader pattern
+- **GraphQL-Batch** - Batch Loader pattern
 - **Bullet** - N+1 query detection
 - **Faker** - Sample data generation
 
@@ -236,7 +236,7 @@ Watch your Rails logs while making requests to see:
 - `preload(:association)` - Always use separate queries
 - `eager_load(:association)` - Always use LEFT OUTER JOIN
 
-### GraphQL DataLoader Pattern
+### GraphQL Batch Loader Pattern
 
 - Batch loading to reduce database queries
 - Per-request caching
@@ -246,7 +246,7 @@ Watch your Rails logs while making requests to see:
 
 1. **Introduction (10 min)**: N+1 problem explanation
 2. **Rails Examples (30 min)**: Live coding and challenges
-3. **GraphQL Examples (35 min)**: DataLoader implementation
+3. **GraphQL Examples (35 min)**: Batch Loader implementation
 4. **Discussion (15 min)**: Best practices and Q&A
 
 ## 🐛 Troubleshooting

@@ -91,12 +91,12 @@ query {
 
       <h3>Your Task</h3>
       <ol>
-        <li><strong>Create a DataLoader</strong>: Write a batch loading function for post authors</li>
-        <li><strong>Update the resolver</strong>: Modify the PostType to use your DataLoader</li>
+        <li><strong>Create a Batch Loader</strong>: Write a batch loading function for post authors</li>
+        <li><strong>Update the resolver</strong>: Modify the PostType to use your Batch Loader</li>
         <li><strong>Test it</strong>: Compare before/after SQL query counts</li>
       </ol>
 
-      <h3>DataLoader Template</h3>
+      <h3>Batch Loader Template</h3>
       <pre><code class="language-ruby">
 class Loaders::AuthorLoader &lt; GraphQL::Batch::Loader
   def perform(user_ids)
@@ -143,20 +143,20 @@ query {
 
       <h3>Your Task</h3>
       <ol>
-        <li><strong>Identify Eager Load Candidates</strong>: For a GraphQL query that fetches posts, their authors, tags, and comments, decide which associations are suitable for Rails eager loading (always needed) and which are better handled by DataLoaders (conditionally or less frequently needed).</li>
+        <li><strong>Identify Eager Load Candidates</strong>: For a GraphQL query that fetches posts, their authors, tags, and comments, decide which associations are suitable for Rails eager loading (always needed) and which are better handled by Batch Loaders (conditionally or less frequently needed).</li>
         <li><strong>Implement Mixed Loading</strong>:
           <ul>
             <li>Modify an existing GraphQL query (e.g., <code>optimizedPosts</code> or create a new one like <code>mixedLoadedPosts</code>) to use Rails <code>includes</code> (or <code>preload</code>/<code>eager_load</code>) for the <code>user</code> and <code>tags</code> associations directly within the primary resolver that fetches the posts.</li>
-            <li>Ensure that the <code>comments</code> association (or another association of your choice if comments are also eager-loaded) continues to be loaded via its DataLoader.</li>
+            <li>Ensure that the <code>comments</code> association (or another association of your choice if comments are also eager-loaded) continues to be loaded via its Batch Loader.</li>
           </ul>
         </li>
-        <li><strong>Verify Efficiency</strong>: Compare the SQL logs before and after your changes. You should see that the queries for users and tags are part of the initial post loading (or batched efficiently by Rails), while comments are still loaded in batches by their DataLoader when requested.</li>
+        <li><strong>Verify Efficiency</strong>: Compare the SQL logs before and after your changes. You should see that the queries for users and tags are part of the initial post loading (or batched efficiently by Rails), while comments are still loaded in batches by their Batch Loader when requested.</li>
       </ol>
 
       <h3>Hints</h3>
       <ul>
         <li>In your GraphQL resolver for posts (e.g., in <code>app/graphql/types/query_type.rb</code>), when fetching <code>Post.all</code>, you can chain <code>.includes(:user, :tags)</code>.</li>
-        <li>Ensure your <code>PostType</code> still defines fields for <code>user</code>, <code>tags</code>, and <code>comments</code>, and that the resolvers for these fields (especially <code>comments</code>) correctly use DataLoaders if they are not part of the initial eager load.</li>
+        <li>Ensure your <code>PostType</code> still defines fields for <code>user</code>, <code>tags</code>, and <code>comments</code>, and that the resolvers for these fields (especially <code>comments</code>) correctly use Batch Loaders if they are not part of the initial eager load.</li>
         <li>Think about the data access patterns: what's displayed immediately vs. what's loaded on interaction?</li>
       </ul>
 
@@ -170,7 +170,7 @@ query {
             <li>You should still see the <code>CommentsByPostLoader</code> (or similar) being invoked and batching queries if you request comments.</li>
           </ul>
         </li>
-        <li>Compare this to a version of the query that relies purely on DataLoaders for all associations, or one that has no N+1 protection, to see the difference in query patterns.</li>
+        <li>Compare this to a version of the query that relies purely on Batch Loaders for all associations, or one that has no N+1 protection, to see the difference in query patterns.</li>
       </ol>
       <p>
         <a href="/graphiql" target="_blank">Open GraphiQL to test your queries</a>

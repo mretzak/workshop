@@ -81,7 +81,7 @@ end
 @posts = Post.includes(:user, :comments)
 ```
 
-### 3. GraphQL DataLoader Solutions (35 minutes)
+### 3. GraphQL Batch Loader Solutions (35 minutes)
 
 #### 3.1 Demonstrate GraphQL N+1 (5 minutes)
 
@@ -96,7 +96,7 @@ query {
 }
 ```
 
-#### 3.2 Explain DataLoader Pattern (10 minutes)
+#### 3.2 Explain Batch Loader Pattern (10 minutes)
 
 - Batching mechanism
 - Per-request cache
@@ -115,7 +115,7 @@ end
 
 #### 3.3 Mini-Challenge (15 minutes)
 
-**Task:** Implement a DataLoader for post comments.
+**Task:** Implement a Batch Loader for post comments.
 
 Template:
 
@@ -137,11 +137,11 @@ Show the complete implementation and how to use it in resolvers.
 
 #### 4.1 Compare Approaches (5 minutes)
 
-| Rails ORM      | GraphQL     |
-| -------------- | ----------- |
-| Eager loading  | DataLoaders |
-| Query-level    | Field-level |
-| All-or-nothing | Selective   |
+| Rails ORM      | GraphQL       |
+| -------------- | ------------- |
+| Eager loading  | Batch Loaders |
+| Query-level    | Field-level   |
+| All-or-nothing | Selective     |
 
 #### 4.2 Detection & Prevention (5 minutes)
 
@@ -177,15 +177,6 @@ rails db:seed
 
 **Bullet not showing warnings:**
 Check `config/environments/development.rb` configuration.
-
-## Extension Activities
-
-For advanced participants:
-
-1. Implement counter caches
-2. Add query complexity analysis
-3. Create custom DataLoader with caching
-4. Benchmark different approaches
 
 ## Resources for Participants
 

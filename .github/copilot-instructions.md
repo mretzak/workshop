@@ -8,7 +8,7 @@ This is a Rails API application designed for teaching N+1 query problems and the
 
 - **Rails 7.1** with PostgreSQL
 - **GraphQL** with graphql-ruby gem
-- **GraphQL-Batch** for DataLoader pattern
+- **GraphQL-Batch** for Batch Loader pattern
 - **Bullet gem** for N+1 detection
 - **Docker** for easy setup
 
@@ -23,7 +23,7 @@ This is a Rails API application designed for teaching N+1 query problems and the
 
 ### 2. GraphQL N+1 Solutions
 
-- DataLoader pattern with GraphQL-Batch
+- Batch Loader pattern with GraphQL-Batch
 - Batch loading functions
 - Per-request caching
 

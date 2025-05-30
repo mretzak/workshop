@@ -78,11 +78,11 @@ query {
 
 ### Your Task
 
-1. **Create a DataLoader**: Write a batch loading function for post authors
-2. **Update the resolver**: Modify the PostType to use your DataLoader
+1. **Create a Batch Loader**: Write a batch loading function for post authors
+2. **Update the resolver**: Modify the PostType to use your Batch Loader
 3. **Test it**: Compare before/after SQL query counts
 
-### DataLoader Template
+### Batch Loader Template
 
 ```ruby
 class Loaders::AuthorLoader < GraphQL::Batch::Loader
@@ -129,16 +129,16 @@ Imagine a GraphQL query for posts where you _always_ want to show the author's n
 
 ### Your Task
 
-1.  **Identify Eager Load Candidates**: For a GraphQL query that fetches posts, their authors, tags, and comments, decide which associations are suitable for Rails eager loading (always needed) and which are better handled by DataLoaders (conditionally or less frequently needed).
+1.  **Identify Eager Load Candidates**: For a GraphQL query that fetches posts, their authors, tags, and comments, decide which associations are suitable for Rails eager loading (always needed) and which are better handled by Batch Loaders (conditionally or less frequently needed).
 2.  **Implement Mixed Loading**:
     - Modify an existing GraphQL query (e.g., `optimizedPosts` or create a new one like `mixedLoadedPosts`) to use Rails `includes` (or `preload`/`eager_load`) for the `user` and `tags` associations directly within the primary resolver that fetches the posts.
-    - Ensure that the `comments` association (or another association of your choice if comments are also eager-loaded) continues to be loaded via its DataLoader.
-3.  **Verify Efficiency**: Compare the SQL logs before and after your changes. You should see that the queries for users and tags are part of the initial post loading (or batched efficiently by Rails), while comments are still loaded in batches by their DataLoader when requested.
+    - Ensure that the `comments` association (or another association of your choice if comments are also eager-loaded) continues to be loaded via its Batch Loader.
+3.  **Verify Efficiency**: Compare the SQL logs before and after your changes. You should see that the queries for users and tags are part of the initial post loading (or batched efficiently by Rails), while comments are still loaded in batches by their Batch Loader when requested.
 
 ### Hints
 
 - In your GraphQL resolver for posts (e.g., in `app/graphql/types/query_type.rb`), when fetching `Post.all`, you can chain `.includes(:user, :tags)`.
-- Ensure your `PostType` still defines fields for `user`, `tags`, and `comments`, and that the resolvers for these fields (especially `comments`) correctly use DataLoaders if they are not part of the initial eager load.
+- Ensure your `PostType` still defines fields for `user`, `tags`, and `comments`, and that the resolvers for these fields (especially `comments`) correctly use Batch Loaders if they are not part of the initial eager load.
 - Think about the data access patterns: what's displayed immediately vs. what's loaded on interaction?
 
 ### Test Your Solution
@@ -148,6 +148,6 @@ Imagine a GraphQL query for posts where you _always_ want to show the author's n
 3.  Examine the Rails console logs:
     - You should see fewer individual N+1 queries for `users` and `tags` associated with each post. Ideally, they are fetched in one or two additional queries by Rails' eager loading mechanism when the posts themselves are loaded.
     - You should still see the `CommentsByPostLoader` (or similar) being invoked and batching queries if you request comments.
-4.  Compare this to a version of the query that relies purely on DataLoaders for all associations, or one that has no N+1 protection, to see the difference in query patterns.
+4.  Compare this to a version of the query that relies purely on Batch Loaders for all associations, or one that has no N+1 protection, to see the difference in query patterns.
 
 ---

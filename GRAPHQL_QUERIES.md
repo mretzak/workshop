@@ -66,7 +66,7 @@ query PostsWithAllAssociations {
 }
 ```
 
-## Optimized Queries (Using DataLoaders)
+## Optimized Queries (Using Batch Loaders)
 
 ### Optimized posts query
 
@@ -116,7 +116,7 @@ query CompareApproaches {
     }
   }
 
-  # This uses DataLoaders
+  # This uses Batch Loaders
   optimizedPosts {
     title
     user {
