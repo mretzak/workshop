@@ -6,8 +6,7 @@
 !/log/.keep
 /tmp
 
-# Ignore database configuration and sensitive files.
-/config/database.yml
+# Ignore sensitive files.
 /config/master.key
 /config/credentials.yml.enc
 
